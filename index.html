@@ -2,10 +2,100 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Find My MLA</title>
+    <link rel="stylesheet" href="./src/css/style.css" />
   </head>
   <body>
-    <div id="app">Test</div>
+    <div
+      class="flex min-h-screen items-center justify-center bg-black font-bold text-white"
+    >
+      <div class="text-center space-y-12">
+        <div class="site-header text-center text-5xl font-bold">
+          Find Your
+          <div
+            class="relative inline-grid grid-cols-1 grid-rows-1 gap-12 overflow-hidden"
+          >
+            <span class="animate-representative col-span-full row-span-full"
+              >MLA</span
+            >
+            <span
+              class="animate-representative-delay-1 col-span-full row-span-full"
+              >MPP</span
+            >
+            <span
+              class="animate-representative-delay-2 col-span-full row-span-full"
+              >MNA</span
+            >
+            <span
+              class="animate-representative-delay-3 col-span-full row-span-full"
+              >MHA</span
+            >
+          </div>
+        </div>
+        <div id="search-widget">
+          <div id="search-all" class="flex justify-center">
+            <div id="search-loading" style="display: none"></div>
+            <div id="search-widget-inner">
+              <div class="w-full max-w-xs" id="search-form">
+                <form
+                  class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+                  onsubmit="submit"
+                >
+                  <div class="mb-4">
+                    <label
+                      class="block text-gray-700 text-sm font-bold mb-2"
+                      for="postal"
+                    >
+                      Enter your Postal Code
+                    </label>
+                    <input
+                      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      id="postal"
+                      type="text"
+                      placeholder="A1A 1A1"
+                      required
+                    />
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <button
+                      id="searchpostal"
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      type="submit"
+                    >
+                      Search By Postal Code
+                    </button>
+                    <button
+                      id="searchlocal"
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      type="button"
+                    >
+                      Use My Current Location
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div id="form-response" class="font-bold" style="display: none">
+                <span>Your representative details:</span>
+                <div class="text-3xl font-bold">Name:</div>
+                <span id="mla"></span>
+                <span id="mla_name"></span>
+                <div class="text-3xl font-bold">Party:</div>
+                <span id="mla_party"></span>
+                <div class="text-3xl font-bold">District:</div>
+                <span id="mla_district"></span>
+                <div class="text-3xl font-bold">Phone:</div>
+                <span id="mla_phone"></span>
+                <div class="text-3xl font-bold">Email:</div>
+                <span id="mla_email"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/js/script.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </body>
 </html>
