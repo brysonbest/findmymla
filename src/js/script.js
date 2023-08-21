@@ -154,7 +154,6 @@ async function runSearch(variation) {
     }
   } catch (error) {
     console.log(error);
-    defaultErrorResponse();
   } finally {
     try {
       let finalDataJSON = await representSearch(lat, long, postal);
@@ -171,7 +170,8 @@ async function search(variation) {
   await runSearch(variation).then((data) => {
     const filtered_for_mla = data.objects.filter((item) => {
       if (
-        typeof item["elected_office"] !== "undefined" ||
+        typeof item !== "undefined" &&
+        typeof item["elected_office"] !== "undefined" &&
         item["elected_office"] !== null
       ) {
         return (

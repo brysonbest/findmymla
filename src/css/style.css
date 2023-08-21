@@ -63,17 +63,16 @@
   width: 100%;
   height: 100%;
   text-align: center;
-  transition: transform 0.8s;
+  transition: transform 0.3s;
   transform-style: preserve-3d;
 }
 
 #search-form,
 #form-response {
-  position: absolute;
+  color: black;
   width: 100%;
   height: 100%;
-  /* -webkit-backface-visibility: hidden;
-  backface-visibility: hidden; */
+  transition: transform 2s;
 }
 
 #form-response {
