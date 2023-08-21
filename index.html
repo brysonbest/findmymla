@@ -8,10 +8,8 @@
     <link rel="stylesheet" href="./src/css/style.css" />
   </head>
   <body>
-    <div
-      class="flex min-h-screen items-center justify-center bg-black font-bold text-white"
-    >
-      <div class="text-center space-y-12">
+    <div class="flex min-h-screen justify-center bg-black font-bold text-white">
+      <div class="text-center space-y-2">
         <div class="site-header text-center text-5xl font-bold">
           Find Your
           <div
@@ -33,8 +31,8 @@
               >MHA</span
             >
           </div>
-          <div id="search-error"></div>
         </div>
+        <div id="search-error" class="text-red-500"></div>
         <div id="search-widget">
           <div id="search-all" class="flex justify-center">
             <div id="search-loading" style="display: none"></div>
@@ -77,19 +75,35 @@
                   </div>
                 </form>
               </div>
-              <div id="form-response" class="font-bold" style="display: none">
-                <span>Your representative details:</span>
-                <div class="text-3xl font-bold">Name:</div>
-                <span id="mla"></span>
-                <span id="mla_name"></span>
-                <div class="text-3xl font-bold">Party:</div>
-                <span id="mla_party"></span>
-                <div class="text-3xl font-bold">District:</div>
-                <span id="mla_district"></span>
-                <div class="text-3xl font-bold">Phone:</div>
-                <span id="mla_phone"></span>
-                <div class="text-3xl font-bold">Email:</div>
-                <span id="mla_email"></span>
+              <div
+                id="form-response"
+                class="flex flex-col justify-start items-baseline"
+                style="display: none"
+              >
+                <span class="text-3xl font-bold"
+                  >Your representative details:</span
+                >
+                <div class="text-2xl font-bold">
+                  Name: <span class="text-sm" id="mla"></span>
+                  <span class="text-sm" id="mla_name"></span>
+                </div>
+
+                <div class="text-2xl font-bold">
+                  Party: <span class="text-sm" id="mla_party"></span>
+                </div>
+
+                <div class="text-2xl font-bold">
+                  District: <span class="text-sm" id="mla_district"></span>
+                </div>
+
+                <div class="text-2xl font-bold">
+                  Phone: <span class="text-sm" id="mla_phone"></span>
+                </div>
+
+                <div class="text-2xl font-bold">
+                  Email: <span class="text-sm" id="mla_email"></span>
+                </div>
+                <button id="restart">Search Again</button>
               </div>
             </div>
           </div>

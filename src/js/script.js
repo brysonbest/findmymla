@@ -2,38 +2,46 @@ import axios from "axios";
 
 let d = new Date();
 const errorLine = document.getElementById("search-error");
-let coordinates = [];
+const loadingScreen = document.getElementById("search-loading");
+const defaultView = document.getElementById("search-widget-inner");
 
-var x = document.getElementById("search-error");
+const postalButton = document.getElementById("searchpostal");
+const localButton = document.getElementById("searchlocal");
 
-function getTest() {
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(showPositionTest);
+const searchForm = document.getElementById("search-form");
+const formResponse = document.getElementById("form-response");
+
+async function toggleLoading() {
+  if (loadingScreen.style.display === "none") {
+    loadingScreen.style.display = "block";
+    defaultView.style.display = "none";
   } else {
-    x.innerHTML = "Geolocation is not supported by this browser.";
+    loadingScreen.style.display = "none";
+    defaultView.style.display = "block";
   }
 }
 
-function showPositionTest(position) {
-  x.innerHTML =
-    "Latitude: " +
-    position.coords.latitude +
-    "<br>Longitude: " +
-    position.coords.longitude;
+function loadingOff() {
+  loadingScreen.style.display = "none";
+  defaultView.style.display = "block";
+}
+
+function defaultErrorResponse() {
+  errorLine.innerHTML = "No results found";
+  loadingOff();
+}
+
+function clearError() {
+  errorLine.innerHTML = "";
 }
 
 async function dynamicFormSearch() {
-  const y = document.getElementById("search-form");
-  const x = document.getElementById("form-response");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-    y.style.display = "none";
+  if (formResponse.style.display === "none") {
+    formResponse.style.display = "block";
+    searchForm.style.display = "none";
   }
-
-  const postal = document.getElementById("searchpostal");
-  const local = document.getElementById("searchlocal");
-  postal.disabled = true;
-  local.disabled = true;
+  postalButton.disabled = true;
+  localButton.disabled = true;
 }
 
 async function flipSearch() {
@@ -45,16 +53,13 @@ async function flipSearch() {
   }
 }
 
-async function toggleLoading() {
-  const x = document.getElementById("search-loading");
-  const y = document.getElementById("search-widget-inner");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-    y.style.display = "none";
-  } else {
-    x.style.display = "none";
-    y.style.display = "block";
-  }
+function restart() {
+  formResponse.style.display = "none";
+  searchForm.style.display = "block";
+  postalButton.disabled = false;
+  localButton.disabled = false;
+  flipSearch();
+  clearError();
 }
 
 async function representSearch(lat, long, postal) {
@@ -65,10 +70,8 @@ async function representSearch(lat, long, postal) {
     finalURL = `https://represent.opennorth.ca/representatives/?point=${lat}%2C${long}`;
   }
   try {
-    console.log("this is final url", finalURL);
     let finalData = await axios.get(finalURL);
     let finalDataJSON = await finalData.data;
-    console.log(finalDataJSON, "this is finaldata 1");
     return finalDataJSON;
   } catch (error) {
     try {
@@ -77,6 +80,7 @@ async function representSearch(lat, long, postal) {
       return finalDataJSON;
     } catch (error) {
       console.log(error);
+      defaultErrorResponse();
     }
   }
 }
@@ -131,7 +135,6 @@ async function runSearch(variation) {
 
   if (variation === "local") {
     await getLocation();
-    console.log(coords, "this is coordinates");
     lat = coords.lat;
     long = coords.long;
     geocoded = false;
@@ -151,13 +154,14 @@ async function runSearch(variation) {
     }
   } catch (error) {
     console.log(error);
+    defaultErrorResponse();
   } finally {
     try {
       let finalDataJSON = await representSearch(lat, long, postal);
-      console.log(finalDataJSON, "this is finaldata after local search");
       return finalDataJSON;
     } catch (error) {
       console.log(error);
+      defaultErrorResponse();
     }
   }
 }
@@ -199,6 +203,7 @@ async function search(variation) {
 }
 
 function searchLocal() {
+  clearError();
   search("local").then(() => {
     toggleLoading().then(() => {
       flipSearch().then(() => {
@@ -210,6 +215,15 @@ function searchLocal() {
 
 addEventListener("submit", (event) => {
   event.preventDefault();
+  const postal = document.getElementById("postal").value.replace(" ", "");
+  const postalRegex = new RegExp(
+    /([ABCEGHJKLMNPRSTVXY]\d)([ABCEGHJKLMNPRSTVWXYZ]\d){2}/i
+  );
+
+  if (postal.length < 6 || postal.length > 7 || !postalRegex.test(postal)) {
+    errorLine.innerHTML = "Please enter a valid postal code";
+    return;
+  }
   search("postal").then(() => {
     toggleLoading().then(() => {
       flipSearch().then(() => {
@@ -220,3 +234,5 @@ addEventListener("submit", (event) => {
 });
 
 document.getElementById("searchlocal").addEventListener("click", searchLocal);
+document.getElementById("restart").addEventListener("click", restart);
+document.getElementById("postal").addEventListener("input", clearError);
