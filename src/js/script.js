@@ -1,6 +1,26 @@
 import axios from "axios";
 
 let d = new Date();
+const errorLine = document.getElementById("search-error");
+let coordinates = [];
+
+var x = document.getElementById("search-error");
+
+function getTest() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(showPositionTest);
+  } else {
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function showPositionTest(position) {
+  x.innerHTML =
+    "Latitude: " +
+    position.coords.latitude +
+    "<br>Longitude: " +
+    position.coords.longitude;
+}
 
 async function dynamicFormSearch() {
   const y = document.getElementById("search-form");
@@ -37,21 +57,20 @@ async function toggleLoading() {
   }
 }
 
-async function runSearch() {
-  const postal = document.getElementById("postal").value.replace(" ", "");
-  const geocodeURL = `https://geocoder.ca/?locate=${postal}&geoit=XML&json=1`;
-  let representURL = `https://represent.opennorth.ca/postcodes/${postal}/`;
-  let geocoded = false;
+async function representSearch(lat, long, postal) {
+  const representURL = `https://represent.opennorth.ca/postcodes/${postal}/`;
+  let finalURL = representURL;
+
+  if (typeof lat !== "undefined" && typeof long !== "undefined") {
+    finalURL = `https://represent.opennorth.ca/representatives/?point=${lat}%2C${long}`;
+  }
   try {
-    let response = await axios.get(geocodeURL);
-    let data = await response.data;
-    let lat = data["latt"];
-    let long = data["longt"];
-    representURL = `https://represent.opennorth.ca/representatives/?point=${lat}%2C${long}`;
-    geocoded = true;
+    console.log("this is final url", finalURL);
+    let finalData = await axios.get(finalURL);
+    let finalDataJSON = await finalData.data;
+    console.log(finalDataJSON, "this is finaldata 1");
+    return finalDataJSON;
   } catch (error) {
-    console.log(error);
-  } finally {
     try {
       let finalData = await axios.get(representURL);
       let finalDataJSON = await finalData.data;
@@ -62,9 +81,90 @@ async function runSearch() {
   }
 }
 
-async function searchPostal() {
+async function showPosition(position) {
+  coordinates.push(position.coords.latitude);
+  coordinates.push(position.coords.longitude);
+}
+
+const getCoords = async () => {
+  const pos = await new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, showError);
+  });
+
+  return {
+    long: pos.coords.longitude,
+    lat: pos.coords.latitude,
+  };
+};
+
+let coords = {};
+
+async function getLocation() {
+  if (navigator.geolocation) {
+    coords = await getCoords();
+  } else {
+    errorLine.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function showError(error) {
+  switch (error.code) {
+    case error.PERMISSION_DENIED:
+      errorLine.innerHTML = "User denied the request for Geolocation.";
+      break;
+    case error.POSITION_UNAVAILABLE:
+      errorLine.innerHTML = "Location information is unavailable.";
+      break;
+    case error.TIMEOUT:
+      errorLine.innerHTML = "The request to get user location timed out.";
+      break;
+    case error.UNKNOWN_ERROR:
+      errorLine.innerHTML = "An unknown error occurred.";
+      break;
+  }
+}
+
+async function runSearch(variation) {
+  let lat;
+  let long;
+  let geocoded;
+
+  if (variation === "local") {
+    await getLocation();
+    console.log(coords, "this is coordinates");
+    lat = coords.lat;
+    long = coords.long;
+    geocoded = false;
+  } else {
+    geocoded = true;
+  }
+
+  const postal = document.getElementById("postal").value.replace(" ", "");
+  const geocodeURL = `https://geocoder.ca/?locate=${postal}&geoit=XML&json=1`;
+
+  try {
+    if (geocoded) {
+      let response = await axios.get(geocodeURL);
+      let data = await response.data;
+      lat = data["latt"];
+      long = data["longt"];
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    try {
+      let finalDataJSON = await representSearch(lat, long, postal);
+      console.log(finalDataJSON, "this is finaldata after local search");
+      return finalDataJSON;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
+async function search(variation) {
   toggleLoading();
-  await runSearch().then((data) => {
+  await runSearch(variation).then((data) => {
     const filtered_for_mla = data.objects.filter((item) => {
       if (
         typeof item["elected_office"] !== "undefined" ||
@@ -99,15 +199,18 @@ async function searchPostal() {
 }
 
 function searchLocal() {
-  // alert("Hello Local!");
-  // dynamicFormSearch();
-  toggleLoading();
-  setTimeout(toggleLoading, 5000);
+  search("local").then(() => {
+    toggleLoading().then(() => {
+      flipSearch().then(() => {
+        dynamicFormSearch();
+      });
+    });
+  });
 }
 
 addEventListener("submit", (event) => {
   event.preventDefault();
-  searchPostal().then(() => {
+  search("postal").then(() => {
     toggleLoading().then(() => {
       flipSearch().then(() => {
         dynamicFormSearch();
@@ -115,7 +218,5 @@ addEventListener("submit", (event) => {
     });
   });
 });
-
-// document.getElementById("searchpostal").addEventListener("click", searchPostal);
 
 document.getElementById("searchlocal").addEventListener("click", searchLocal);
