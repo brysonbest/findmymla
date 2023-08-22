@@ -36,21 +36,15 @@ function clearError() {
 }
 
 async function dynamicFormSearch() {
-  if (formResponse.style.display === "none") {
-    formResponse.style.display = "block";
-    searchForm.style.display = "none";
-  }
+  formResponse.style.display = "block";
+  searchForm.style.display = "none";
   postalButton.disabled = true;
   localButton.disabled = true;
 }
 
 async function flipSearch() {
-  const x = document.getElementById("search-widget");
-  if (x.classList.contains("flipsearch")) {
-    x.classList.remove("flipsearch");
-  } else {
-    x.classList.add("flipsearch");
-  }
+  const y = document.getElementById("search-all");
+  y.classList.toggle("flipsearch");
 }
 
 function restart() {
@@ -168,45 +162,56 @@ async function runSearch(variation) {
 async function search(variation) {
   toggleLoading();
   await runSearch(variation).then((data) => {
-    const filtered_for_mla = data.objects.filter((item) => {
-      if (
-        typeof item !== "undefined" &&
-        typeof item["elected_office"] !== "undefined" &&
-        item["elected_office"] !== null
-      ) {
-        return (
-          item["elected_office"].includes("MLA") ||
-          item["elected_office"].includes("MPP") ||
-          item["elected_office"].includes("MNA") ||
-          item["elected_office"].includes("MHA")
-        );
+    try {
+      const filtered_for_mla = data.objects.filter((item) => {
+        if (
+          typeof item !== "undefined" &&
+          typeof item["elected_office"] !== "undefined" &&
+          item["elected_office"] !== null
+        ) {
+          return (
+            item["elected_office"].includes("MLA") ||
+            item["elected_office"].includes("MPP") ||
+            item["elected_office"].includes("MNA") ||
+            item["elected_office"].includes("MHA")
+          );
+        }
+      });
+
+      const mla = filtered_for_mla[0]["elected_office"].toUpperCase();
+      const mla_name = filtered_for_mla[0]["name"];
+      const mla_party = filtered_for_mla[0]["party_name"];
+      const mla_email = filtered_for_mla[0]["email"];
+      const mla_phone = filtered_for_mla[0]["offices"][0]["tel"];
+      const mla_district = filtered_for_mla[0]["district_name"];
+
+      const mla_phone_stripped = mla_phone.replace("/s+/g/-/g", "");
+
+      if (typeof mla_email === "undefined" || mla_email === null) {
+        mla_email = "No email found";
       }
-    });
-
-    const mla = filtered_for_mla[0]["elected_office"].toUpperCase();
-    const mla_name = filtered_for_mla[0]["name"];
-    const mla_party = filtered_for_mla[0]["party_name"];
-    const mla_email = filtered_for_mla[0]["email"];
-    const mla_phone = filtered_for_mla[0]["offices"][0]["tel"];
-    const mla_district = filtered_for_mla[0]["district_name"];
-
-    if (typeof mla_email === "undefined" || mla_email === null) {
-      mla_email = "No email found";
+      document.getElementById("mla").innerHTML = mla;
+      document.getElementById("mla_name").innerHTML = mla_name;
+      document.getElementById("mla_party").innerHTML = mla_party;
+      document.getElementById("mla_district").innerHTML = mla_district;
+      document.getElementById(
+        "mla_phone"
+      ).innerHTML = `<a style="color:blue" href="tel:${mla_phone_stripped}">${mla_phone}</a>`;
+      document.getElementById(
+        "mla_email"
+      ).innerHTML = `<a style="color:blue" id="mla_email_fill" target="_blank" href="mailto:${mla_email}">${mla_email}</a>`;
+    } catch (error) {
+      console.log(error);
+      defaultErrorResponse();
     }
-    document.getElementById("mla").innerHTML = mla;
-    document.getElementById("mla_name").innerHTML = mla_name;
-    document.getElementById("mla_party").innerHTML = mla_party;
-    document.getElementById("mla_district").innerHTML = mla_district;
-    document.getElementById("mla_phone").innerHTML = mla_phone;
-    document.getElementById("mla_email").innerHTML = mla_email;
   });
 }
 
 function searchLocal() {
   clearError();
   search("local").then(() => {
-    toggleLoading().then(() => {
-      flipSearch().then(() => {
+    flipSearch().then(() => {
+      toggleLoading().then(() => {
         dynamicFormSearch();
       });
     });
@@ -225,8 +230,8 @@ addEventListener("submit", (event) => {
     return;
   }
   search("postal").then(() => {
-    toggleLoading().then(() => {
-      flipSearch().then(() => {
+    flipSearch().then(() => {
+      toggleLoading().then(() => {
         dynamicFormSearch();
       });
     });

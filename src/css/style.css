@@ -42,22 +42,6 @@
   perspective: 1000px;
 }
 
-@keyframes flipAnimation {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(180deg);
-  }
-}
-.flipsearch {
-  animation-name: flipAnimation;
-  animation-duration: 3s;
-  animation-iteration-count: 1;
-  animation-timing-function: ease;
-  animation-fill-mode: forwards;
-}
-
 #search-widget-inner {
   position: relative;
   width: 100%;
@@ -75,13 +59,9 @@
   transition: transform 2s;
 }
 
-#form-response {
-  transform: rotateY(180deg);
-}
-
 #search-loading {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #3498db; /* Blue */
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid #3498db;
   border-radius: 50%;
   width: 120px;
   height: 120px;
