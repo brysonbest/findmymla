@@ -154,7 +154,11 @@ async function runSearch(variation) {
       return finalDataJSON;
     } catch (error) {
       console.log(error);
-      defaultErrorResponse();
+      defaultErrorResponse().then(() => {
+        setTimeout(() => {
+          clearError();
+        }, 1000);
+      });
     }
   }
 }
@@ -181,7 +185,7 @@ async function search(variation) {
       const mla = filtered_for_mla[0]["elected_office"].toUpperCase();
       const mla_name = filtered_for_mla[0]["name"];
       const mla_party = filtered_for_mla[0]["party_name"];
-      const mla_email = filtered_for_mla[0]["email"];
+      let mla_email = filtered_for_mla[0]["email"];
       const mla_phone = filtered_for_mla[0]["offices"][0]["tel"];
       const mla_district = filtered_for_mla[0]["district_name"];
 
@@ -203,6 +207,11 @@ async function search(variation) {
     } catch (error) {
       console.log(error);
       defaultErrorResponse();
+      setTimeout(() => {
+        clearError();
+        loadingOff();
+        restart();
+      }, 1000);
     }
   });
 }
